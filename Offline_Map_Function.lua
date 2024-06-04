@@ -23,6 +23,7 @@ function Offline_MAP.echo(what,err)
   echo("\n")
 end
 ----------
+--設定離線區要用的位置
 function LoginOffLine(RoomID)
   if not RoomID then
     if not  map.currentRoom then 
@@ -36,3 +37,4 @@ function LoginOffLine(RoomID)
     Offline_MAP.echo("Default Room is Here you are : "..Offline_MAP.currentRoom)
     centerview(Offline_MAP.currentRoom)
 end
+----------
