@@ -1,9 +1,10 @@
 --Original by doubleruri
---IMPORTMANT Notice:
---Need function and variable of generic_mapper:
---getRoomName() getRoomUserData() getRoomExits() getSpecialExits()
---map.currentRoom
-c
+--1. IMPORTMANT Notice:
+--     Need function and variable of generic_mapper:
+--     getRoomName() getRoomUserData() getRoomExits() getSpecialExits()
+--     map.currentRoom
+--2. You can skip searching config file by saving your variable<OfflineMapViewer.config.SavePath, put your config-file fullpath in it> permanely.
+--
 ----Working flow----
 --1. Set where to start explorer offline world.
 --   You can choise a room ID from map or where you are now.
@@ -15,45 +16,87 @@ c
 --   [1] click exits
 --   [2][Todo]type command to move
 --5. If you want to back to Reality,just type look or use OfflineMapViewer.Logout()
-
+--
 ----Function LIST----
 --[Done]OfflineMapViewer.echo(what,err)
---[Done]OfflineMapViewer.Login(RoomID)
 --[Done]OfflineMapViewer.DataLoad(RoomID)
+--[Done]OfflineMapViewer.Login(RoomID)
 --[Done]OfflineMapViewer.Logout()
---[Working]OfflineMapViewer.config()
+--[Done]OfflineMapViewer.config()
+--[Done]save configs to file
+--
 ----key Variable----
 --OfflineMapViewer.currentRoom
 --OfflineMapViewer.previousRoom
 --OfflineMapViewer.recallPoint
+--settingInProfile:   File that store user config-file. You can asign a path to one directory for different profile.
 
---table.save("C:/Users/doubl/OneDrive/圖片/MudletUI/MapSetting.lua", Offline_MAP.setting)
---table.save("C:/Users/doubl/OneDrive/圖片/MudletUI/MapSetting.lua", Offline_MAP.setting)
---table.load
+
 OfflineMapViewer = OfflineMapViewer or {}
-OfflineMapViewer.setting = {}
-OfflineMapViewer.setting.pattern = 2
-OfflineMapViewer.setting.movemethod = "1"
-OfflineMapViewer.setting.ClearWindow = false
-OfflineMapViewer.currentRoom = ""
-OfflineMapViewer.previousRoom = ""
-OfflineMapViewer.whatInRoom = {"description","NPC","OBJ","Notes"}
+OfflineMapViewer.configs = OfflineMapViewer.configs or {}
+
+local settingInProfile = getMudletHomeDir().."/Module_OfflineMapViewer.txt"
+if not OfflineMapViewer.configs.SavePath then
+  if io.exists(settingInProfile)
+    then
+      table.load(settingInProfile,OfflineMapViewer.configs)
+      table.load(OfflineMapViewer.configs.SavePath,OfflineMapViewer.configs)
+    else
+      local FileInProfile = io.open(settingInProfile,"w+")
+      FileInProfile:close()
+      OfflineMapViewer.configs.SavePath = invokeFileDialog(false, "Where do you save the config file? ")
+      local ConfigFile = io.open(OfflineMapViewer.configs.SavePath.."/OMapViewerConfig.txt","a+")
+      ConfigFile:close()
+      OfflineMapViewer.configs.SavePath = OfflineMapViewer.configs.SavePath.."/OMapViewerConfig.txt"
+      table.save(getMudletHomeDir().."/Module_OfflineMapViewer.txt",OfflineMapViewer.configs)
+	  table.save(OfflineMapViewer.configs.SavePath,OfflineMapViewer.configs)
+  end
+  else
+table.load(OfflineMapViewer.configs.SavePath,OfflineMapViewer.configs)
+end
+--result : profile folder 有記錄檔，讀取紀錄的設定內含自訂的位置。
+--        讀取自訂位置的紀錄檔
+--        如果沒有，在profile folder內創一個檔，自選一個路徑後在該路徑下創自訂紀錄檔案，
+--        並把路徑指向該檔案後寫進profile folder內的檔案和自訂路徑的檔案
+--table.load(getMudletHomeDir().."/Module_OfflineMapViewer.txt",OfflineMapViewer)
+
+OfflineMapViewer.configs.pattern = OfflineMapViewer.configs.pattern or 2
+OfflineMapViewer.configs.moveMethod = OfflineMapViewer.configs.moveMethod or 1
+OfflineMapViewer.configs.ClearWindow = OfflineMapViewer.configs.ClearWindow or false
+OfflineMapViewer.configs.whatInRoom = OfflineMapViewer.configs.whatInRoom or {"description","NPC","OBJ","Notes"}
+OfflineMapViewer.Message = {}
+OfflineMapViewer.Message.Set1=[[
+╔════════════╦════════════╗
+║       Pattern 1        ║       Pattern 2        ║
+╟────────────╫────────────╢
+║  <255,255,0>Exits<192,192,192>: <34,139,34>east<192,192,192>,<34,139,34>west<192,192,192>...   ║   <255,255,0>Exits<192,192,192>:               ║
+║                        ║     <34,139,34>east<192,192,192>－roomname     ║
+║                        ║     <34,139,34>west<192,192,192>－roomname     ║
+╚════════════╩════════════╝
+]]
+OfflineMapViewer.Message.Set2=[[
+
+      Where do you want to login World?
+        <167,145,199>Set your position<192,192,192> in map and Login again <255,255,0>OR<192,192,192>
+        Alias <167,145,199>worldlogin <RoomID>  <255,255,0>OR<192,192,192>
+        <167,145,199>Type <RoomID><192,192,192> at CmdLine and Click Login Button
+]]
 
 --播報員的function
 local MapperVoice = "<112,229,0>[Offline_MAP]: "
 local ErrorVoice = "<255,0,0>[<178,34,34>Offline_MAP<255,0,0>]: "
 function OfflineMapViewer.echo(what,err)
   if err then decho("Offline_World",ErrorVoice) else decho("Offline_World",MapperVoice) end
-  echo("Offline_World",tostring(what).."\n")
+  decho("Offline_World",tostring(what))
   --echo("Offline_World","\n")
 end
 ----------
---設定離線區要用的位置
+--Function--
 function OfflineMapViewer.Login(RoomID)
   if not RoomID then
     if not  map.currentRoom then 
-      OfflineMapViewer.echo("Offline_World","請找出現在的房間號或指定要去的地方",1)
-    return
+      OfflineMapViewer.echo(OfflineMapViewer.Message.Set2,1)
+     return
     else OfflineMapViewer.currentRoom = tonumber(map.currentRoom)
     end
   else
@@ -70,12 +113,13 @@ function OfflineMapViewer.Login(RoomID)
 end
 
 function OfflineMapViewer.DataLoad(RoomID)
-if OfflineMapViewer.setting.ClearWindow then clearWindow() end
+OfflineMapViewer.roomUserData = getAllRoomUserData(RoomID)
+if OfflineMapViewer.configs.ClearWindow then clearWindow("Offline_World") end
 echo("Offline_World","\n") 
 decho("Offline_World","<255,255,0>"..getRoomName(RoomID).."\n")
 --顯示RoomUserData,依照offlineMapViewer.whatInRoom裡的順序
 --Show RoomUserData order by OfflineMapViewer.whatInRoom
-for k,v in ipairs (OfflineMapViewer.whatInRoom) do
+for k,v in ipairs (OfflineMapViewer.configs.whatInRoom) do
   local results = getRoomUserData(RoomID,v,true)
   if  results then echo("Offline_World",results.."\n") end
 end
@@ -91,7 +135,7 @@ if table.is_empty(exits) and table.is_empty(special_exits)
 																		  OfflineMapViewer.DataLoad(OfflineMapViewer.previousRoom)
 																		end,"")
 end
-if OfflineMapViewer.setting.pattern == 2 then
+if OfflineMapViewer.configs.pattern == 2 then
   for dir,id in pairs (exits) do
    	dechoLink("Offline_World","<34,139,34>"..dir.."<192,192,192>－"..getRoomName(id).."\n", function() OfflineMapViewer.previousRoom = tonumber(RoomID)
                                                                                                        centerview(id)
@@ -135,16 +179,48 @@ function OfflineMapViewer.Logout()
   send("look")
 end
 
+function OfflineMapViewer.setRoomKeyToShow()
+local roomKey = getCmdLine("Offline_World")
+roomKey = string.split(roomKey,",")
+OfflineMapViewer.whatInRoom =roomKey
+end
+
 function OfflineMapViewer.config(var,set)
-echo("Offline_World","Setting :\n")
-echo("Offline_World","ClearWindow : "..OfflineMapViewer.ClearWindow.."\n")
-echo("Offline_World","Show userRoomData : "..OfflineMapViewer.whatInRoom.."\n")
-echo("Offline_World","Exits Pattern : "..OfflineMapViewer.pattern.."\n")
-echo("Offline_World","movemethod : "..OfflineMapViewer.movemethod.."\n")
-echo("Offline_World","1 -- Click     2 --command (NotWorking)\n")
-OfflineMapViewer.echo("SavePath : ".."\n")
-OfflineMapViewer.echo("SAVE to File??\n")
-dechoLink("Offline_World","<112,220,0>[YES]","","",true)
-dechoLink("Offline_World","<112,220,0>[No]",[[OfflineMapViewer.config()]]),"",true)
+local exitsample = OfflineMapViewer.Message.Set1
+decho("Offline_World","<255,255,255:72,61,139>\n-----------------------Setting-----------------------\n")
+dechoLink("Offline_World","<b><255,255,255:47,79,79>1.ClearWindow       :</b>",function()
+                                                                                 if OfflineMapViewer.configs.ClearWindow 
+                                                                                  then OfflineMapViewer.configs.ClearWindow = false
+                                                                                  else OfflineMapViewer.configs.ClearWindow = true
+                                                                                 end
+                                                                                 OfflineMapViewer.config()
+                                                                                end,"",true)
+decho("Offline_World","  "..tostring(OfflineMapViewer.configs.ClearWindow).."\n")
+dechoLink("Offline_World","<b><255,255,255:47,79,79>2.Show userRoomData :</b>",[[OfflineMapViewer.setRoomKeyToShow() OfflineMapViewer.config()]],"",true)
+decho("Offline_World","  "..table.concat(OfflineMapViewer.configs.whatInRoom,", ").."\n")
+dechoLink("Offline_World","<b><255,255,255:47,79,79>3.Exits Pattern     :</b>",function()
+                                                                                 if OfflineMapViewer.configs.pattern == 1 
+                                                                                  then OfflineMapViewer.configs.pattern = 2
+                                                                                      
+                                                                                  else OfflineMapViewer.configs.pattern = 1
+                                                                                 end
+                                                                                 OfflineMapViewer.config() end,"",true)
+decho("Offline_World","  "..tostring(OfflineMapViewer.configs.pattern).."\n")
+if OfflineMapViewer.configs.pattern == 1 then
+     exitsample = utf8.gsub(exitsample,"Pattern 1","<255,69,0>Pattern 1<192,192,192>")
+  else
+  exitsample = utf8.gsub(exitsample,"Pattern 2","<255,69,0>Pattern 2<192,192,192>")
+end
+decho("Offline_World",exitsample)
+dechoLink("Offline_World","<b><255,255,255:47,79,79>4.Movemethod        :</b>",function() end,"",true)
+decho("Offline_World","  "..OfflineMapViewer.configs.moveMethod.."\n")
+decho("Offline_World","(1)-- Click     (2)-- Command (NotComplete)\n")
+dechoLink("Offline_World","<b><255,255,255:47,79,79>SavePath :</b>",function() end,"",true)
+decho("Offline_World"," "..OfflineMapViewer.configs.SavePath.."\n")
+decho("Offline_World","<255,255,255:72,61,139>---------------Click to Switch Setting---------------\n")
+OfflineMapViewer.echo("SAVE to File??            ")
+dechoLink("Offline_World","<220,220,0>[YES]",function() table.save(OfflineMapViewer.configs.SavePath,OfflineMapViewer.configs) end,"",true)
+decho("Offline_World","  ")
+dechoLink("Offline_World","<220,220,0>[NO]\n",[[OfflineMapViewer.echo("\nSetting won't save to file.\nOpen Profile next time will be same setting before\n",1)]],"",true)
 
 end

@@ -2,7 +2,76 @@
 --另一個用來呈現資料的視窗，避免影響原來頁面
 --放置在一個adjustable.container讓使用者自行移動位置
 -- Put World into an adjustable container
-OfflineMapViewer = OfflineMapViewer or {}
+--Buttons for :
+--  1. View your room
+--  2. Go back
+--  3. Recall
+--  4. Login
+--  5. Logout
+--  6. config
+
+--利用setClickCallback() 後面接function/lua code/luacode store in string的特性
+--建立table去方便管理
+OfflineMapViewer.ButtonClick =
+{
+--View your room
+onClickButton_1 =
+  function()
+    OfflineMapViewer.DataLoad(OfflineMapViewer.currentRoom)
+  end,
+--Go back
+onClickButton_2 =
+  function()
+	OfflineMapViewer.currentRoom = tonumber(OfflineMapViewer.previousRoom)
+	centerview(OfflineMapViewer.currentRoom)
+    OfflineMapViewer.DataLoad(OfflineMapViewer.currentRoom)
+  end,
+--Recall
+onClickButton_3 =
+  function()
+	OfflineMapViewer.previousRoom = tonumber(OfflineMapViewer.currentRoom)
+	OfflineMapViewer.currentRoom = tonumber(OfflineMapViewer.recallPoint)
+	centerview(OfflineMapViewer.currentRoom)
+    OfflineMapViewer.DataLoad(OfflineMapViewer.currentRoom)
+  end,
+--Login
+onClickButton_4 =
+  function()
+    local starpoint = getCmdLine()
+	if type(startpoint) == number
+      then 
+        OfflineMapViewer.Login(startpoint)
+      else
+        OfflineMapViewer.echo(OfflineMapViewer.Message.Set2,1)
+    end
+  end,
+--Logout
+onClickButton_5 =
+  function()
+    clearWindow("Offline_World")
+    OfflineMapViewer.currentRoom = nil
+    OfflineMapViewer.previousRoom = nil
+    OfflineMapViewer.recallPoint = nil
+    decho("Offline_World","      Clear World\n      Clear currentRoom...")
+    tempTimer(0.5,[[decho("Offline_World","done\n            previousRoom....")]])
+    tempTimer(1,[[decho("Offline_World","done\n            recallPoint....")]])
+    tempTimer(1.5,[[decho("Offline_World","done\n\n<255,202,229>        Fairy<192,192,192>: See you next time!\n")]])
+    tempTimer(3,[[OfflineMapViewer.OffLineWindow:hide()]])
+    if map.currentRoom
+	  then
+        centerview(map.currentRoom)
+	  else
+        send("look",false)
+    end
+  end,
+
+onClickButton_6 =
+  function()
+    OfflineMapViewer.config()
+  end,
+
+}
+
 OfflineMapViewer.OffLineWindow = Adjustable.Container:new({
   name="Offline_Mode",
   width = "75%" ,height = "70%" ,
@@ -19,68 +88,93 @@ OfflineMapViewer.OffLineWindow = Adjustable.Container:new({
 })
 OfflineMapViewer.OffLineWindow:hide()
 
+----Menu----
 OfflineMapViewer.OffLineMenuBar = Geyser.Container:new({
   name = "OffLineMenuBar",
   x = 10, y =60,
-  width = "50%", height = "10%",
+  width = "90%", height = 60,
   color = "<192,192,192,0>",
 },OfflineMapViewer.OffLineWindow)
 
 OfflineMapViewer.OffLineMenuBar_1 = Geyser.Label:new({
-  name = "OffLineWorld_Setting",
-  x = 10 ,y = 0,
-  width = 70, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Setting.png)",
-  --message = "⚙",
+  name = "SeeAroundButton",
+  x = 10+70*0 ,y = 0,
+  width = 60, height = "100%",
+  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/SeeAroundButton.png)",
   },OfflineMapViewer.OffLineMenuBar)
-OfflineMapViewer.OffLineMenuBar_1:setCursor("PointingHand")
-OfflineMapViewer.OffLineMenuBar_1:setClickCallback(OfflineMapViewer.config())
 
 OfflineMapViewer.OffLineMenuBar_2 = Geyser.Label:new({
   name = "BackStepButton",
   x = 10+70*1 ,y = 0,
-  height = "100%", width = 70,
+   width = 60, height = "100%",
   stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Backstepbutton.png)",
   },OfflineMapViewer.OffLineMenuBar)
-OfflineMapViewer.OffLineMenuBar_2:setClickCallback(function() centerview(OfflineMapViewer.previousRoom)
-                                                          OfflineMapViewer.DataLoad(OfflineMapViewer.previousRoom)
-														  OfflineMapViewer.currentRoom=tonumber(OfflineMapViewer.previousRoom)
-														  end)
-OfflineMapViewer.OffLineMenuBar_2:setCursor("PointingHand")
 
 OfflineMapViewer.OffLineMenuBar_3 = Geyser.Label:new({
   name = "RecallButton",
   x = 10+70*2 ,y = 0,
-  width = 70, height = "100%",
+  width = 60, height = "100%",
   stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Recall.png)",
   },OfflineMapViewer.OffLineMenuBar)
-OfflineMapViewer.OffLineMenuBar_3:setClickCallback(function()centerview(OfflineMapViewer.recallPoint)
-                                                              OfflineMapViewer.DataLoad(OfflineMapViewer.recallPoint)
-															  OfflineMapViewer.currentRoom = tonumber(OfflineMapViewer.recallPoint)
-															  end)
-OfflineMapViewer.OffLineMenuBar_3:setCursor("PointingHand")                            
- 
+                                
+OfflineMapViewer.OffLineMenuBar_4 = Geyser.Label:new({
+  name = "LoginButton",
+  x = 10+70*3 ,y = 0,
+  width = 60, height = "100%",
+  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/LoginButton.png)",
+  --message = "⚙",
+  },OfflineMapViewer.OffLineMenuBar)
 
-local function OfflineModeCMD(text)
-end
+OfflineMapViewer.OffLineMenuBar_5 = Geyser.Label:new({
+  name = "LogoutButton",
+  x = 10+70*4 ,y = 0,
+  width = 60, height = "100%",
+  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/LogoutButton.png)",
+  --message = "⚙",
+  },OfflineMapViewer.OffLineMenuBar)
+
+OfflineMapViewer.OffLineMenuBar_6 = Geyser.Label:new({
+  name = "OffLineWorld_ConfigButton",
+  x = 10+70*5 ,y = 0,
+  width = 60, height = "100%",
+  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Setting.png)",
+  --message = "⚙",
+  },OfflineMapViewer.OffLineMenuBar)
+
+OfflineMapViewer.OffLineMenuBar_1:setCursor("PointingHand")
+OfflineMapViewer.OffLineMenuBar_2:setCursor("PointingHand")
+OfflineMapViewer.OffLineMenuBar_3:setCursor("PointingHand")
+OfflineMapViewer.OffLineMenuBar_4:setCursor("PointingHand")
+OfflineMapViewer.OffLineMenuBar_5:setCursor("PointingHand")
+OfflineMapViewer.OffLineMenuBar_6:setCursor("PointingHand")
+
+OfflineMapViewer.OffLineMenuBar_1:setClickCallback("OfflineMapViewer.ButtonClick.onClickButton_1")
+OfflineMapViewer.OffLineMenuBar_2:setClickCallback("OfflineMapViewer.ButtonClick.onClickButton_2")
+OfflineMapViewer.OffLineMenuBar_3:setClickCallback("OfflineMapViewer.ButtonClick.onClickButton_3")
+OfflineMapViewer.OffLineMenuBar_4:setClickCallback("OfflineMapViewer.ButtonClick.onClickButton_4")
+OfflineMapViewer.OffLineMenuBar_5:setClickCallback("OfflineMapViewer.ButtonClick.onClickButton_5")
+OfflineMapViewer.OffLineMenuBar_6:setClickCallback("OfflineMapViewer.ButtonClick.onClickButton_6")
+
+
 
 OfflineMapViewer.OffLineWorld = Geyser.MiniConsole:new({
   name="Offline_World",
   x="0%", y="20%",
   width="100%", height="70%",
   color = "black",
-  font = "標楷體",
+  font = "細明體", -- speiclized your world word
   fontSize = 16,
   scrollBar = true,
   autoWrap = true,
   commandLine = true, --false it if you don't need
   scrolling = true,
-  actionFunc = "OfflineModeCMD", --避免輸入命令送到主視窗
 },OfflineMapViewer.OffLineWindow)
 
+--[[ Consider if needed
 OfflineMapViewer.OffLineHint = Geyser.Label:new({
-  name = "",
-  x = "10%",y = "90%"
+  name = "MoveHint",
+  x = "10%",y = "90%",
   width = "80%", height = "10%",
   --color = "<>",
 },OfflineMapViewer.OffLineWindow)
+]]
