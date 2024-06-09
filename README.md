@@ -13,16 +13,10 @@ To use it you must have a map and MudletPackage[generic_mapper] installed for so
 
 [[To Do list]]
 
-<<<<<<< HEAD
 --[move out plan]move in Offline World by command
 --[move out plan]hint for movethod
 --Change UI button size by resolution
 --User custom UI injuction
-=======
---move in Offline World by command
---hint for movethod : [Label]OfflineMapViewer.OffLineHint
---locate file path you like
->>>>>>> 74879f25fed27f137c7392750ab642fba12e1539
 
 ChangeLog:
 2024.6.9
