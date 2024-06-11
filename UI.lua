@@ -14,7 +14,7 @@
 local DesignX,DesignY = 1440,960
 local ActureX,ActureY = getMainWindowSize()
 local x_Factor,y_Factor = ActureX/DesignX, ActureY/DesignY
-local OfflineMapViewer.UIgfx_path = getMudletHomeDir().."/OfflineMapViewer/"
+OfflineMapViewer.UIgfx_path = getMudletHomeDir().."/OfflineMapViewer/"
 --利用setClickCallback() 後面接function/lua code/luacode store in string的特性
 --建立table去方便管理
 OfflineMapViewer.ButtonClick =
