@@ -11,12 +11,12 @@ First It is for my favor chinese MUD -- Realms of Chaos , and I try to make a ge
 To use it you must have a map and MudletPackage[generic_mapper] installed for some function.
 
 
-[[To Do list]]
+[To Do list]
 
---[move out plan]move in Offline World by command
---[move out plan]hint for movethod
---[Done]Change UI button size by resolution
---User custom UI injuction
+  [move out plan]move in Offline World by command
+  [move out plan]hint for movethod
+  [Done]Change UI button size by resolution
+  User custom UI injuction
 
 ChangeLog:
 2024.6.12
