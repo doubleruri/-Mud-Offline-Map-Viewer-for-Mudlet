@@ -15,10 +15,15 @@ To use it you must have a map and MudletPackage[generic_mapper] installed for so
 
 --[move out plan]move in Offline World by command
 --[move out plan]hint for movethod
---Change UI button size by resolution
+--[Done]Change UI button size by resolution
 --User custom UI injuction
 
 ChangeLog:
+2024.6.12
+v1.5.1
+  [Add] Scale initial UI size by window resolution
+  Fix some bug : UI botton and exits
+  
 2024.6.9
 v1.4
   [impreved]config file path: favor filename
