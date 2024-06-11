@@ -10,6 +10,11 @@
 --  5. Logout
 --  6. config
 
+--UI initical size adjust with window resolution,user y_factor
+local DesignX,DesignY = 1440,960
+local ActureX,ActureY = getMainWindowSize()
+local x_Factor,y_Factor = ActureX/DesignX, ActureY/DesignY
+local OfflineMapViewer.UIgfx_path = getMudletHomeDir().."/OfflineMapViewer/"
 --利用setClickCallback() 後面接function/lua code/luacode store in string的特性
 --建立table去方便管理
 OfflineMapViewer.ButtonClick =
@@ -37,7 +42,7 @@ onClickButton_3 =
 --Login
 onClickButton_4 =
   function()
-    local starpoint = getCmdLine()
+    local startpoint = getCmdLine()
 	if type(startpoint) == number
       then 
         OfflineMapViewer.Login(startpoint)
@@ -84,7 +89,6 @@ OfflineMapViewer.OffLineWindow = Adjustable.Container:new({
                 QLabel{ border-radius: 20px; background-color: rgba(140,140,140,100%);}
                 QLabel::hover{ background-color: rgba(160,160,160,50%);}
               ]],
-  auto_hidden = true,
 })
 OfflineMapViewer.OffLineWindow:hide()
 
@@ -92,52 +96,52 @@ OfflineMapViewer.OffLineWindow:hide()
 OfflineMapViewer.OffLineMenuBar = Geyser.Container:new({
   name = "OffLineMenuBar",
   x = 10, y =60,
-  width = "90%", height = 60,
+  width = "90%", height = 32*y_Factor,
   color = "<192,192,192,0>",
 },OfflineMapViewer.OffLineWindow)
 
 OfflineMapViewer.OffLineMenuBar_1 = Geyser.Label:new({
   name = "SeeAroundButton",
-  x = 10+70*0 ,y = 0,
-  width = 60, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/SeeAroundButton.png)",
+  x = 10+35*0*y_Factor ,y = 0,
+  width = 32*y_Factor, height = "100%",
+  stylesheet = "border-image : url("..OfflineMapViewer.UIgfx_path.."SeeAroundButton.png)",
   },OfflineMapViewer.OffLineMenuBar)
 
 OfflineMapViewer.OffLineMenuBar_2 = Geyser.Label:new({
   name = "BackStepButton",
-  x = 10+70*1 ,y = 0,
-   width = 60, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Backstepbutton.png)",
+  x = 10+35*1*y_Factor ,y = 0,
+   width = 32*y_Factor, height = "100%",
+  stylesheet = "border-image : url("..OfflineMapViewer.UIgfx_path.."Backstepbutton.png)",
   },OfflineMapViewer.OffLineMenuBar)
 
 OfflineMapViewer.OffLineMenuBar_3 = Geyser.Label:new({
   name = "RecallButton",
-  x = 10+70*2 ,y = 0,
-  width = 60, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Recall.png)",
+  x = 10+35*2*y_Factor ,y = 0,
+  width = 32*y_Factor, height = "100%",
+  stylesheet = "border-image : url("..OfflineMapViewer.UIgfx_path.."Recall.png)",
   },OfflineMapViewer.OffLineMenuBar)
                                 
 OfflineMapViewer.OffLineMenuBar_4 = Geyser.Label:new({
   name = "LoginButton",
-  x = 10+70*3 ,y = 0,
-  width = 60, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/LoginButton.png)",
+  x = 10+35*3*y_Factor ,y = 0,
+  width = 32*y_Factor, height = "100%",
+  stylesheet = "border-image : url("..OfflineMapViewer.UIgfx_path.."LoginButton.png)",
   --message = "⚙",
   },OfflineMapViewer.OffLineMenuBar)
 
 OfflineMapViewer.OffLineMenuBar_5 = Geyser.Label:new({
   name = "LogoutButton",
-  x = 10+70*4 ,y = 0,
-  width = 60, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/LogoutButton.png)",
+  x = 10+35*4*y_Factor ,y = 0,
+  width = 32*y_Factor, height = "100%",
+  stylesheet = "border-image : url("..OfflineMapViewer.UIgfx_path.."LogoutButton.png)",
   --message = "⚙",
   },OfflineMapViewer.OffLineMenuBar)
 
 OfflineMapViewer.OffLineMenuBar_6 = Geyser.Label:new({
   name = "OffLineWorld_ConfigButton",
-  x = 10+70*5 ,y = 0,
-  width = 60, height = "100%",
-  stylesheet = "border-image : url("..gfx_path.."/OfflineMapUI/Setting.png)",
+  x = 10+35*5*y_Factor ,y = 0,
+  width = 32*y_Factor, height = "100%",
+  stylesheet = "border-image : url("..OfflineMapViewer.UIgfx_path.."Setting.png)",
   --message = "⚙",
   },OfflineMapViewer.OffLineMenuBar)
 
