@@ -153,7 +153,7 @@ if OfflineMapViewer.configs.pattern == 2 then
 else
   local numberOfExits = 1
   for dir,id in pairs (exits) do
-    if numberOfExits >2 then echo("Offline_World"," , ") end
+    if numberOfExits >1 then echo("Offline_World"," , ") end
     dechoLink("Offline_World","<34,139,34>"..dir.."<192,192,192>", function()
 	                                                                 OfflineMapViewer.previousRoom = tonumber(RoomID)
 																	 centerview(id)
